@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>流星雨献给小玉 💠</title>
+<style>
+  html,body { height:100%; margin:0; background:#020214; -webkit-user-select:none; -ms-user-select:none; user-select:none;}
+  canvas { display:block; width:100vw; height:100vh; }
+  .panel {
+    position: fixed;
+    right: 10px;
+    top: 10px;
+    background: rgba(8,8,16,0.6);
+    color: #fff;
+    padding: 10px;
+    border-radius: 10px;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    backdrop-filter: blur(6px);
+    max-width: 260px;
+    z-index: 9999;
+  }
+  .panel h4 { margin:0 0 8px 0; font-size:14px; }
+  .row { display:flex; align-items:center; gap:8px; margin:6px 0; font-size:13px; }
+  .row input[type=range] { flex:1; }
+  .btn { background:#1c2541; padding:6px 8px; border-radius:6px; color:#fff; border:0; cursor:pointer; font-size:13px;}
+  .small { font-size:12px; color:#cbd5e1; }
+  .footer { font-size:11px; color:#9aa6c1; margin-top:6px; text-align:right;}
+  .big-btn { display:block; width:100%; margin-top:8px; padding:8px 6px; background:#294264; border-radius:8px; border:0; color:#fff; font-weight:600;}
+  .stat { font-size:12px; color:#dbe7ff; margin-left:6px;}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div class="panel" id="panel" aria-hidden="false">
+  <h4>流星雨控制</h4>
+  <div class="row"><label class="small">密度</label><input id="density" type="range" min="0" max="0.3" step="0.005" value="0.06"><span id="densityVal" class="stat">0.06</span></div>
+  <div class="row"><label class="small">速度</label><input id="speed" type="range" min="200" max="2400" step="50" value="1200"><span id="speedVal" class="stat">1200</span></div>
+  <div class="row"><label class="small">大小</label><input id="size" type="range" min="1" max="10" step="0.5" value="4"><span id="sizeVal" class="stat">4</span></div>
+  <div class="row"><label class="small">拖尾</label><input id="trail" type="range" min="4" max="30" step="1" value="12"><span id="trailVal" class="stat">12</span></div>
+  <button id="pause" class="big-btn">暂停</button>
+  <button id="spawnBtn" class="btn" style="margin-top:8px">点我召唤流星</button>
+  <div class="footer">触摸/点击屏幕也可召唤流星 • 双指缩放浏览器可查看不同尺寸</div>
+</div>
+
+<script>
+(() => {
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d', { alpha: false });
+  let DPR = Math.max(window.devicePixelRatio || 1, 1);
+
+  let SPAWN_RATE = parseFloat(document.getElementById('density').value);
+  let BASE_SPEED = parseFloat(document.getElementById('speed').value);
+  let BASE_SIZE = parseFloat(document.getElementById('size').value);
+  let TRAIL_LEN = parseInt(document.getElementById('trail').value, 10);
+
+  const densityRange = document.getElementById('density');
+  const densityVal = document.getElementById('densityVal');
+  const speedRange = document.getElementById('speed');
+  const speedVal = document.getElementById('speedVal');
+  const sizeRange = document.getElementById('size');
+  const sizeVal = document.getElementById('sizeVal');
+  const trailRange = document.getElementById('trail');
+  const trailVal = document.getElementById('trailVal');
+
+  densityRange.oninput = (e) => { SPAWN_RATE = +e.target.value; densityVal.textContent = SPAWN_RATE.toFixed(3); }
+  speedRange.oninput = (e) => { BASE_SPEED = +e.target.value; speedVal.textContent = Math.round(BASE_SPEED); }
+  sizeRange.oninput = (e) => { BASE_SIZE = +e.target.value; sizeVal.textContent = BASE_SIZE; }
+  trailRange.oninput = (e) => { TRAIL_LEN = +e.target.value; trailVal.textContent = TRAIL_LEN; }
+
+  const pauseBtn = document.getElementById('pause');
+  const spawnBtn = document.getElementById('spawnBtn');
+
+  let W = 0, H = 0;
+  function resize() {
+    DPR = Math.max(window.devicePixelRatio || 1, 1);
+    if (DPR > 2.5) DPR = 2.5;
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    canvas.width = Math.round(W * DPR);
+    canvas.height = Math.round(H * DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.fillStyle = '#020214';
+    ctx.fillRect(0,0,W,H);
+  }
+  window.addEventListener('resize', resize, {passive:true});
+  resize();
+
+  class Meteor {
+    constructor(x,y,vx,vy,size,color,trailLen){
+      this.x = x; this.y = y;
+      this.vx = vx; this.vy = vy;
+      this.size = size;
+      this.color = color;
+      this.trail = [];
+      this.maxTrail = trailLen || TRAIL_LEN;
+      this.alive = true;
+    }
+    update(dt){
+      this.trail.unshift({x:this.x, y:this.y});
+      if (this.trail.length > this.maxTrail) this.trail.length = this.maxTrail;
+      this.x += this.vx * dt;
+      this.y += this.vy * dt;
+      const M = 80;
+      if (this.x < -M || this.x > W + M || this.y < -M || this.y > H + M) this.alive = false;
+    }
+    draw(ctx){
+      if (this.trail.length > 1) {
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+        ctx.globalCompositeOperation = 'lighter';
+        for (let i = this.trail.length - 1; i > 0; i--) {
+          const p1 = this.trail[i];
+          const p2 = this.trail[i-1];
+          const t = (i / this.trail.length);
+          const alpha = Math.pow(t, 1.1) * 0.18;
+          ctx.strokeStyle = `rgba(${Math.round(this.color[0]*255)},${Math.round(this.color[1]*255)},${Math.round(this.color[2]*255)},${alpha})`;
+          ctx.lineWidth = Math.max(1, this.size * (0.6 + t*0.9));
+          ctx.beginPath();
+          ctx.moveTo(p1.x, p1.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.stroke();
+        }
+        ctx.globalCompositeOperation = 'source-over';
+      }
+
+      const r = this.size;
+      const gx = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, r*3);
+      gx.addColorStop(0, 'rgba(255,255,255,1)');
+      gx.addColorStop(0.18, `rgba(${Math.round(this.color[0]*255)},${Math.round(this.color[1]*255)},${Math.round(this.color[2]*255)},0.9)`);
+      gx.addColorStop(0.45, `rgba(${Math.round(this.color[0]*255)},${Math.round(this.color[1]*255)},${Math.round(this.color[2]*255)},0.28)`);
+      gx.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = gx;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, r*2, 0, Math.PI*2);
+      ctx.fill();
+    }
+  }
+
+  let meteors = [];
+  function spawnMeteor({randomSpawn=true, x=null, y=null} = {}) {
+    let sx, sy;
+    const angleVar = (Math.random() - 0.5) * 0.4;
+    if (randomSpawn) {
+      if (Math.random() < 0.6) {
+        sx = randBetween(-0.2*W, 0.2*W);
+        sy = randBetween(0.8*H, H*1.3);
+      } else {
+        sx = randBetween(0, W*0.6);
+        sy = randBetween(0.8*H, H*1.3);
+      }
+    } else { sx = x; sy = y; }
+
+    const speed = randBetween(BASE_SPEED*0.6, BASE_SPEED*1.2);
+    const vx = speed * (0.7 + angleVar);
+    const vy = -speed * (0.45 + angleVar*0.25);
+    const size = randBetween(Math.max(1, BASE_SIZE*0.5), BASE_SIZE*1.2);
+    const colors = [
+      [1.0, 1.0, 0.9],
+      [0.78, 0.9, 1.0],
+      [1.0, 0.95, 0.8]
+    ];
+    const color = colors[Math.floor(Math.random()*colors.length)];
+    const m = new Meteor(sx, sy, vx/1000, vy/1000, size, color, TRAIL_LEN);
+    meteors.push(m);
+  }
+
+  function randBetween(a,b){ return a + Math.random()*(b-a); }
+
+  for (let i=0;i<12;i++) spawnMeteor({randomSpawn:true});
+
+  function handlePointer(x,y) {
+    const count = Math.floor(randBetween(1,3));
+    for (let i=0;i<count;i++){
+      spawnMeteor({randomSpawn:false, x:x + randBetween(-20,20), y:y + randBetween(-20,20)});
+    }
+  }
+
+  let lastTap = 0;
+  canvas.addEventListener('pointerdown', (ev) => {
+    ev.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    handlePointer(ev.clientX - rect.left, ev.clientY - rect.top);
+    const now = Date.now();
+    if (now - lastTap < 300) {
+      for (let i=0;i<6;i++) spawnMeteor({randomSpawn:true});
+    }
+    lastTap = now;
+  }, {passive:false});
+
+  spawnBtn.addEventListener('click', ()=> {
+    for (let i=0;i<6;i++) spawnMeteor({randomSpawn:true});
+  });
+
+  let running = true;
+  pauseBtn.addEventListener('click', ()=> {
+    running = !running;
+    pauseBtn.textContent = running ? '暂停' : '继续';
+    if (running) lastTime = performance.now(), loop(lastTime);
+  });
+
+  let lastTime = performance.now();
+  let fpsLast = performance.now(), frames = 0, fps = 0;
+
+  function loop(t) {
+    if (!running) return;
+    const dt = Math.min(40, t - lastTime);
+    lastTime = t;
+    const secs = dt / 1000;
+
+    if (Math.random() < SPAWN_RATE) spawnMeteor({randomSpawn:true});
+
+    // background
+    ctx.fillStyle = '#020214';
+    ctx.fillRect(0,0,W,H);
+
+    // --- 发光水印（方案 B）开始 ---
+    ctx.save();
+    ctx.textAlign = 'center';
+    const fontSize = Math.max(16, Math.round(Math.min(42, W * 0.045)));
+    ctx.font = `${fontSize}px system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans SC", "Microsoft YaHei", sans-serif`;
+
+    // 发光层（暖色光晕）
+    ctx.globalAlpha = 0.95;
+    ctx.shadowColor = 'rgba(255,220,160,0.95)'; // 暖光色
+    ctx.shadowBlur = Math.max(8, Math.round(fontSize * 0.7));
+    ctx.fillStyle = 'rgba(255,235,200,0.95)';
+    ctx.fillText('流星雨献给小玉 💠', W / 2, Math.max(36, fontSize + 8));
+
+    // 白色主体字，去掉阴影
+    ctx.shadowColor = 'rgba(0,0,0,0)';
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillText('流星雨献给小玉 💠', W / 2, Math.max(36, fontSize + 8));
+    ctx.restore();
+    // --- 发光水印（方案 B）结束 ---
+
+    for (let i = meteors.length-1; i >= 0; i--) {
+      const m = meteors[i];
+      m.update(secs * 1000);
+      m.maxTrail = TRAIL_LEN;
+      if (!m.alive) {
+        meteors.splice(i,1);
+        continue;
+      }
+      m.draw(ctx);
+    }
+
+    frames++;
+    if (performance.now() - fpsLast > 500) {
+      fps = Math.round((frames * 1000) / (performance.now() - fpsLast));
+      fpsLast = performance.now();
+      frames = 0;
+    }
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.font = '12px system-ui, -apple-system, "Segoe UI", Roboto';
+    ctx.fillText(`流星: ${meteors.length}`, 10, 18);
+    ctx.fillText(`FPS: ${fps}`, 10, 34);
+
+    requestAnimationFrame(loop);
+  }
+
+  requestAnimationFrame(loop);
+
+  const applyRealtime = () => {
+    SPAWN_RATE = parseFloat(densityRange.value);
+    BASE_SPEED = parseFloat(speedRange.value);
+    BASE_SIZE = parseFloat(sizeRange.value);
+    TRAIL_LEN = parseInt(trailRange.value, 10);
+    densityVal.textContent = SPAWN_RATE.toFixed(3);
+    speedVal.textContent = Math.round(BASE_SPEED);
+    sizeVal.textContent = BASE_SIZE;
+    trailVal.textContent = TRAIL_LEN;
+  };
+  [densityRange, speedRange, sizeRange, trailRange].forEach(r=> {
+    r.addEventListener('input', applyRealtime);
+    r.addEventListener('change', applyRealtime);
+  });
+
+  window.addEventListener('orientationchange', () => { setTimeout(resize, 120); }, {passive:true});
+})();
+</script>
+</body>
+</html>
