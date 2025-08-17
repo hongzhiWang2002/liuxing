@@ -2,12 +2,22 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no,minimum-scale=1,maximum-scale=1"/>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-touch-fullscreen" content="yes">
 <title>小玉の网站</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  * { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+    -webkit-tap-highlight-color: transparent;
+  }
+  
   html, body { 
-    height: 100%; 
+    height: 100vh; 
+    width: 100vw;
     background: #020214; 
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", "Microsoft YaHei", sans-serif;
     -webkit-user-select: none; 
@@ -15,25 +25,118 @@
     user-select: none;
     overflow: hidden;
     -webkit-touch-callout: none;
-    -webkit-tap-highlight-color: transparent;
-  }
-  
-  canvas { 
-    display: block; 
-    width: 100vw; 
-    height: 100vh; 
     position: fixed;
     top: 0;
     left: 0;
+  }
+  
+  /* iOS Safari 专用优化 */
+  @supports (-webkit-touch-callout: none) {
+    html, body {
+      -webkit-overflow-scrolling: touch;
+      -webkit-transform: translate3d(0,0,0);
+      transform: translate3d(0,0,0);
+    }
+  }
+  
+  .background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
     z-index: 1;
+    background: radial-gradient(ellipse at center, #0a0a20 0%, #020214 50%, #000008 100%);
+  }
+  
+  .stars {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: 
+      radial-gradient(2px 2px at 20px 30px, #eee, transparent),
+      radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
+      radial-gradient(1px 1px at 90px 40px, #fff, transparent),
+      radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.6), transparent),
+      radial-gradient(2px 2px at 160px 30px, rgba(255,255,255,0.9), transparent);
+    background-repeat: repeat;
+    background-size: 200px 100px;
+    animation: twinkle 4s linear infinite;
+  }
+  
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 1; }
+  }
+  
+  .shooting-star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #fff, transparent);
+    animation: shoot 3s linear infinite;
+    opacity: 0;
+  }
+  
+  @keyframes shoot {
+    0% {
+      opacity: 0;
+      transform: translateX(-100px) translateY(50px);
+    }
+    10% {
+      opacity: 1;
+    }
+    90% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translateX(300px) translateY(-200px);
+    }
+  }
+  
+  .shooting-star:nth-child(1) { 
+    top: 10%; 
+    left: 10%; 
+    animation-delay: 0s;
+    box-shadow: 0 0 10px #fff, 0 0 20px #87ceeb, -10px 5px 30px rgba(255,255,255,0.3);
+  }
+  
+  .shooting-star:nth-child(2) { 
+    top: 30%; 
+    left: 20%; 
+    animation-delay: 1s;
+    box-shadow: 0 0 10px #fff, 0 0 20px #ffb6c1, -10px 5px 30px rgba(255,182,193,0.3);
+  }
+  
+  .shooting-star:nth-child(3) { 
+    top: 50%; 
+    left: 30%; 
+    animation-delay: 2s;
+    box-shadow: 0 0 10px #fff, 0 0 20px #dda0dd, -10px 5px 30px rgba(221,160,221,0.3);
+  }
+  
+  .shooting-star:nth-child(4) { 
+    top: 20%; 
+    left: 50%; 
+    animation-delay: 0.5s;
+    box-shadow: 0 0 10px #fff, 0 0 20px #87ceeb, -10px 5px 30px rgba(255,255,255,0.3);
+  }
+  
+  .shooting-star:nth-child(5) { 
+    top: 70%; 
+    left: 60%; 
+    animation-delay: 1.5s;
+    box-shadow: 0 0 10px #fff, 0 0 20px #f0e68c, -10px 5px 30px rgba(240,230,140,0.3);
   }
   
   .content {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -45,23 +148,33 @@
   }
   
   .question {
-    font-size: clamp(24px, 5vw, 36px);
+    font-size: clamp(24px, 6vw, 36px);
     color: #fff;
     margin-bottom: 50px;
-    text-shadow: 0 0 20px rgba(255,255,255,0.9), 0 0 40px rgba(135,206,250,0.7), 0 0 60px rgba(255,182,193,0.5);
+    text-shadow: 
+      0 0 20px rgba(255,255,255,0.9), 
+      0 0 40px rgba(135,206,250,0.7), 
+      0 0 60px rgba(255,182,193,0.5);
     animation: glow 2s ease-in-out infinite alternate;
     font-weight: 700;
     line-height: 1.4;
     letter-spacing: 1px;
+    max-width: 90%;
   }
   
   @keyframes glow {
     from { 
-      text-shadow: 0 0 20px rgba(255,255,255,0.9), 0 0 40px rgba(135,206,250,0.7), 0 0 60px rgba(255,182,193,0.5);
+      text-shadow: 
+        0 0 20px rgba(255,255,255,0.9), 
+        0 0 40px rgba(135,206,250,0.7), 
+        0 0 60px rgba(255,182,193,0.5);
       transform: scale(1);
     }
     to { 
-      text-shadow: 0 0 30px rgba(255,255,255,1), 0 0 60px rgba(135,206,250,0.9), 0 0 80px rgba(255,182,193,0.7);
+      text-shadow: 
+        0 0 30px rgba(255,255,255,1), 
+        0 0 60px rgba(135,206,250,0.9), 
+        0 0 80px rgba(255,182,193,0.7);
       transform: scale(1.02);
     }
   }
@@ -87,6 +200,8 @@
     box-shadow: 0 12px 40px rgba(0,0,0,0.4);
     backdrop-filter: blur(15px);
     border: 2px solid rgba(255,255,255,0.1);
+    -webkit-appearance: none;
+    -webkit-tap-highlight-color: transparent;
   }
   
   .btn:before {
@@ -100,7 +215,8 @@
     transition: left 0.6s;
   }
   
-  .btn:hover:before {
+  .btn:hover:before,
+  .btn:active:before {
     left: 100%;
   }
   
@@ -133,7 +249,9 @@
     color: #fff;
     text-align: center;
     opacity: 0;
-    text-shadow: 0 0 30px rgba(255,255,255,0.9), 0 0 50px rgba(255,182,193,0.7);
+    text-shadow: 
+      0 0 30px rgba(255,255,255,0.9), 
+      0 0 50px rgba(255,182,193,0.7);
     font-weight: 700;
     line-height: 1.6;
     z-index: 30;
@@ -150,10 +268,11 @@
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
     pointer-events: none;
     z-index: 25;
+    overflow: hidden;
   }
   
   .heart {
@@ -161,6 +280,7 @@
     font-size: 30px;
     animation: heartFloat 4s ease-out forwards;
     text-shadow: 0 0 15px rgba(255,105,180,0.9);
+    pointer-events: none;
   }
   
   @keyframes heartFloat {
@@ -190,7 +310,10 @@
     position: absolute;
     font-size: 40px;
     animation: massiveHeartFloat 5s ease-out forwards;
-    text-shadow: 0 0 20px rgba(255,105,180,1), 0 0 40px rgba(255,182,193,0.8);
+    text-shadow: 
+      0 0 20px rgba(255,105,180,1), 
+      0 0 40px rgba(255,182,193,0.8);
+    pointer-events: none;
   }
   
   @keyframes massiveHeartFloat {
@@ -259,30 +382,27 @@
     .question {
       margin-bottom: 60px;
       padding: 0 15px;
+      font-size: clamp(20px, 7vw, 28px);
     }
     
     .result-message {
-      font-size: 22px;
+      font-size: clamp(18px, 5vw, 24px);
       padding: 25px 20px;
+    }
+    
+    .shooting-star {
+      display: none; /* 在移动设备上隐藏可能有问题的动画 */
     }
   }
   
-  /* iOS Safari 兼容性优化 */
-  @supports (-webkit-touch-callout: none) {
+  /* iOS 设备特定优化 */
+  @media screen and (-webkit-min-device-pixel-ratio: 2) {
     body {
-      -webkit-touch-callout: none;
-      -webkit-user-select: none;
-      position: fixed;
-      width: 100%;
-      height: 100%;
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
     }
     
-    .btn {
-      -webkit-tap-highlight-color: transparent;
-      -webkit-appearance: none;
-    }
-    
-    canvas {
+    .background, .stars {
       -webkit-transform: translate3d(0,0,0);
       transform: translate3d(0,0,0);
     }
@@ -290,13 +410,21 @@
 </style>
 </head>
 <body>
-<canvas id="c"></canvas>
+
+<div class="background">
+  <div class="stars"></div>
+  <div class="shooting-star"></div>
+  <div class="shooting-star"></div>
+  <div class="shooting-star"></div>
+  <div class="shooting-star"></div>
+  <div class="shooting-star"></div>
+</div>
 
 <div class="content" id="mainContent">
-  <div class="question">你想要看吴寒玉的腹肌吗？🤔</div>
+  <div class="question">小玉宝宝别生气啦？🤔</div>
   <div class="button-container">
-    <button class="btn btn-yes" id="yesBtn">想要看 ✨</button>
-    <button class="btn btn-no" id="noBtn">不想要看 😤</button>
+    <button class="btn btn-yes" id="yesBtn">去死好吗？ 😤</button>
+    <button class="btn btn-no" id="noBtn">原谅你啦 ！✨</button>
   </div>
 </div>
 
@@ -305,166 +433,17 @@
 
 <script>
 (() => {
-  // 动态流星背景效果
-  const canvas = document.getElementById('c');
-  const ctx = canvas.getContext('2d', { alpha: false });
-  let DPR = Math.max(window.devicePixelRatio || 1, 1);
+  'use strict';
   
-  const SPAWN_RATE = 0.12;
-  const BASE_SPEED = 1200;
-  const BASE_SIZE = 3.5;
-  const TRAIL_LEN = 18;
+  // 检测是否为iOS设备
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
   
-  let W = 0, H = 0;
-  
-  function resize() {
-    DPR = Math.max(window.devicePixelRatio || 1, 1);
-    if (DPR > 2.5) DPR = 2.5;
-    W = window.innerWidth;
-    H = window.innerHeight;
-    canvas.style.width = W + 'px';
-    canvas.style.height = H + 'px';
-    canvas.width = Math.round(W * DPR);
-    canvas.height = Math.round(H * DPR);
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  // iOS兼容性优化
+  if (isIOS) {
+    document.body.style.webkitTransform = 'translate3d(0,0,0)';
+    document.body.style.transform = 'translate3d(0,0,0)';
   }
-  
-  window.addEventListener('resize', resize, {passive: true});
-  window.addEventListener('orientationchange', () => setTimeout(resize, 100), {passive: true});
-  resize();
-  
-  class Meteor {
-    constructor(x, y, vx, vy, size, color, trailLen) {
-      this.x = x;
-      this.y = y;
-      this.vx = vx;
-      this.vy = vy;
-      this.size = size;
-      this.color = color;
-      this.trail = [];
-      this.maxTrail = trailLen || TRAIL_LEN;
-      this.alive = true;
-      this.opacity = Math.random() * 0.5 + 0.5;
-    }
-    
-    update(dt) {
-      this.trail.unshift({x: this.x, y: this.y});
-      if (this.trail.length > this.maxTrail) this.trail.length = this.maxTrail;
-      this.x += this.vx * dt;
-      this.y += this.vy * dt;
-      const M = 100;
-      if (this.x < -M || this.x > W + M || this.y < -M || this.y > H + M) this.alive = false;
-    }
-    
-    draw(ctx) {
-      if (this.trail.length > 1) {
-        ctx.lineJoin = 'round';
-        ctx.lineCap = 'round';
-        ctx.globalCompositeOperation = 'lighter';
-        for (let i = this.trail.length - 1; i > 0; i--) {
-          const p1 = this.trail[i];
-          const p2 = this.trail[i - 1];
-          const t = (i / this.trail.length);
-          const alpha = Math.pow(t, 1.2) * 0.2 * this.opacity;
-          ctx.strokeStyle = `rgba(${Math.round(this.color[0] * 255)},${Math.round(this.color[1] * 255)},${Math.round(this.color[2] * 255)},${alpha})`;
-          ctx.lineWidth = Math.max(1.5, this.size * (0.5 + t * 1.2));
-          ctx.beginPath();
-          ctx.moveTo(p1.x, p1.y);
-          ctx.lineTo(p2.x, p2.y);
-          ctx.stroke();
-        }
-        ctx.globalCompositeOperation = 'source-over';
-      }
-      
-      const r = this.size;
-      const gx = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, r * 3);
-      gx.addColorStop(0, `rgba(255,255,255,${0.9 * this.opacity})`);
-      gx.addColorStop(0.2, `rgba(${Math.round(this.color[0] * 255)},${Math.round(this.color[1] * 255)},${Math.round(this.color[2] * 255)},${0.8 * this.opacity})`);
-      gx.addColorStop(0.5, `rgba(${Math.round(this.color[0] * 255)},${Math.round(this.color[1] * 255)},${Math.round(this.color[2] * 255)},${0.4 * this.opacity})`);
-      gx.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = gx;
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, r * 2.2, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  }
-  
-  let meteors = [];
-  
-  function spawnMeteor() {
-    const edge = Math.random();
-    let sx, sy, vx, vy;
-    
-    if (edge < 0.6) {
-      // 从上方和左上角来
-      sx = randBetween(-W * 0.2, W * 0.3);
-      sy = randBetween(-H * 0.1, H * 0.2);
-      const angleVar = (Math.random() - 0.5) * 0.4;
-      const speed = randBetween(BASE_SPEED * 0.8, BASE_SPEED * 1.4);
-      vx = speed * (0.7 + angleVar);
-      vy = speed * (0.6 + angleVar * 0.3);
-    } else {
-      // 从右上角来
-      sx = randBetween(W * 0.7, W * 1.2);
-      sy = randBetween(-H * 0.1, H * 0.3);
-      const angleVar = (Math.random() - 0.5) * 0.3;
-      const speed = randBetween(BASE_SPEED * 0.7, BASE_SPEED * 1.2);
-      vx = -speed * (0.8 + angleVar);
-      vy = speed * (0.5 + angleVar * 0.2);
-    }
-    
-    const size = randBetween(BASE_SIZE * 0.7, BASE_SIZE * 1.6);
-    
-    const colors = [
-      [1.0, 1.0, 0.95],    // 白色
-      [0.8, 0.9, 1.0],     // 淡蓝色
-      [1.0, 0.9, 0.7],     // 淡黄色
-      [0.9, 0.8, 1.0],     // 淡紫色
-      [1.0, 0.8, 0.9],     // 淡粉色
-      [0.8, 1.0, 0.9]      // 淡绿色
-    ];
-    const color = colors[Math.floor(Math.random() * colors.length)];
-    
-    meteors.push(new Meteor(sx, sy, vx / 1000, vy / 1000, size, color, TRAIL_LEN));
-  }
-  
-  function randBetween(a, b) { return a + Math.random() * (b - a); }
-  
-  // 初始化流星
-  for (let i = 0; i < 12; i++) spawnMeteor();
-  
-  let lastTime = performance.now();
-  
-  function loop(t) {
-    const dt = Math.min(50, t - lastTime);
-    lastTime = t;
-    const secs = dt / 1000;
-    
-    if (Math.random() < SPAWN_RATE) spawnMeteor();
-    
-    // 渐变背景
-    const bgGradient = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, Math.max(W, H));
-    bgGradient.addColorStop(0, '#0a0a20');
-    bgGradient.addColorStop(0.5, '#020214');
-    bgGradient.addColorStop(1, '#000008');
-    ctx.fillStyle = bgGradient;
-    ctx.fillRect(0, 0, W, H);
-    
-    // 更新和绘制流星
-    for (let i = meteors.length - 1; i >= 0; i--) {
-      const m = meteors[i];
-      m.update(secs * 1000);
-      if (!m.alive) {
-        meteors.splice(i, 1);
-        continue;
-      }
-      m.draw(ctx);
-    }
-    
-    requestAnimationFrame(loop);
-  }
-  
-  requestAnimationFrame(loop);
   
   // 交互逻辑
   const yesBtn = document.getElementById('yesBtn');
@@ -475,18 +454,39 @@
   
   let yesClickCount = 0;
   let gameEnded = false;
+  let touchHandled = false;
+  
+  // 防止iOS双击缩放
+  let lastTouchEnd = 0;
+  document.addEventListener('touchend', function (event) {
+    const now = Date.now();
+    if (now - lastTouchEnd <= 300) {
+      event.preventDefault();
+    }
+    lastTouchEnd = now;
+  }, {passive: false});
+  
+  // 防止iOS滚动
+  document.addEventListener('touchmove', function(e) {
+    e.preventDefault();
+  }, {passive: false});
   
   // "想要看" 按钮逻辑
-  yesBtn.addEventListener('click', (e) => {
-    if (gameEnded) return;
+  function handleYesClick(e) {
+    if (gameEnded || touchHandled) return;
     
     e.preventDefault();
+    e.stopPropagation();
+    touchHandled = true;
+    
+    setTimeout(() => { touchHandled = false; }, 300);
+    
     yesClickCount++;
     
     // 创建点击爱心效果
     createHearts(e.target.getBoundingClientRect());
     
-    // 按钮大小变化 - 初始想要看按钮1.2倍，不想要看0.7倍
+    // 按钮大小变化
     const yesScale = Math.max(0.4, 1.2 - yesClickCount * 0.16);
     const noScale = Math.min(2.0, 0.7 + yesClickCount * 0.26);
     
@@ -495,11 +495,11 @@
     
     // 按钮文字变化
     const yesTexts = [
-      '想要看 ✨', 
-      '真的想看 🥺', 
-      '超想看的 😍', 
-      '拜托了 🙏', 
-      '最后一次 💕'
+      '给我死滚 ✨', 
+      '别狗叫了 🥺', 
+      ' bro你也配？🙏'', 
+      '回家好吗？孩子 🥺', 
+      '不可能滴 ！🙏'
     ];
     if (yesClickCount < yesTexts.length) {
       yesBtn.textContent = yesTexts[yesClickCount];
@@ -512,39 +512,61 @@
       
       setTimeout(() => {
         createMassiveHearts();
-        showResult('哈哈哈！🤣<br><br>吴寒玉没有腹肌啦～<br><br>只有软软的小肚肚 🤭<br><br>💕 被骗了吧 💕');
+        showResult('哈哈哈！🤣<br><br>玉米豆没有生气啦～<br><br>王宏智你个傻子 💕<br><br>💕 被骗了吧 💕');
       }, 800);
     }
-  });
+  }
   
   // "不想要看" 按钮逻辑
-  noBtn.addEventListener('click', (e) => {
-    if (gameEnded) return;
+  function handleNoClick(e) {
+    if (gameEnded || touchHandled) return;
     
     e.preventDefault();
+    e.stopPropagation();
+    touchHandled = true;
+    
+    setTimeout(() => { touchHandled = false; }, 300);
+    
     gameEnded = true;
     mainContent.style.opacity = '0';
     
     setTimeout(() => {
-      showResult('😔 你失去了观看吴寒玉腹肌的机会<br><br>（其实她也没有腹肌啦 😝）<br><br>💔 下次要抓住机会哦 💔');
+      showResult(' 谢谢宝宝<br><br>（爱你宝贝 😝）<br><br>💔 亲亲 💔');
     }, 800);
-  });
+  }
+  
+  // 绑定事件（同时支持点击和触摸）
+  yesBtn.addEventListener('click', handleYesClick, {passive: false});
+  yesBtn.addEventListener('touchend', handleYesClick, {passive: false});
+  
+  noBtn.addEventListener('click', handleNoClick, {passive: false});
+  noBtn.addEventListener('touchend', handleNoClick, {passive: false});
   
   function createHearts(buttonRect) {
     const heartSymbols = ['💖', '💕', '💗', '💘', '💝', '💞', '💓', '💟'];
     
     for (let i = 0; i < 8; i++) {
-      const heart = document.createElement('div');
-      heart.className = 'heart';
-      heart.textContent = heartSymbols[Math.floor(Math.random() * heartSymbols.length)];
-      heart.style.left = buttonRect.left + buttonRect.width/2 + (Math.random() - 0.5) * 120 + 'px';
-      heart.style.top = buttonRect.top + buttonRect.height/2 + 'px';
-      heart.style.fontSize = (25 + Math.random() * 20) + 'px';
-      heart.style.animationDelay = Math.random() * 0.5 + 's';
-      
-      heartContainer.appendChild(heart);
-      
-      setTimeout(() => heart.remove(), 4000);
+      setTimeout(() => {
+        const heart = document.createElement('div');
+        heart.className = 'heart';
+        heart.textContent = heartSymbols[Math.floor(Math.random() * heartSymbols.length)];
+        
+        const centerX = buttonRect.left + buttonRect.width / 2;
+        const centerY = buttonRect.top + buttonRect.height / 2;
+        
+        heart.style.left = (centerX + (Math.random() - 0.5) * 120) + 'px';
+        heart.style.top = centerY + 'px';
+        heart.style.fontSize = (25 + Math.random() * 20) + 'px';
+        heart.style.animationDelay = Math.random() * 0.5 + 's';
+        
+        heartContainer.appendChild(heart);
+        
+        setTimeout(() => {
+          if (heart.parentNode) {
+            heart.parentNode.removeChild(heart);
+          }
+        }, 4000);
+      }, i * 100);
     }
   }
   
@@ -557,8 +579,8 @@
         const heart = document.createElement('div');
         heart.className = 'massive-heart';
         heart.textContent = heartSymbols[Math.floor(Math.random() * heartSymbols.length)];
-        heart.style.left = Math.random() * W + 'px';
-        heart.style.top = Math.random() * H + 'px';
+        heart.style.left = Math.random() * window.innerWidth + 'px';
+        heart.style.top = Math.random() * window.innerHeight + 'px';
         heart.style.fontSize = (30 + Math.random() * 25) + 'px';
         heart.style.animationDelay = Math.random() * 0.8 + 's';
         
@@ -568,7 +590,11 @@
         
         heartContainer.appendChild(heart);
         
-        setTimeout(() => heart.remove(), 5000);
+        setTimeout(() => {
+          if (heart.parentNode) {
+            heart.parentNode.removeChild(heart);
+          }
+        }, 5000);
       }, i * 80);
     }
   }
@@ -579,29 +605,17 @@
     resultMessage.style.opacity = '1';
   }
   
-  // iOS兼容性优化
-  let startY = 0;
-  
-  document.addEventListener('touchstart', (e) => {
-    startY = e.touches[0].clientY;
-  }, {passive: true});
-  
-  document.addEventListener('touchmove', (e) => {
-    const currentY = e.touches[0].clientY;
-    if ((currentY > startY && window.scrollY <= 0) || (currentY < startY && window.scrollY >= document.body.scrollHeight - window.innerHeight)) {
-      e.preventDefault();
-    }
-  }, {passive: false});
-  
-  // 防止双击缩放
-  let lastTouchEnd = 0;
-  document.addEventListener('touchend', (e) => {
-    const now = Date.now();
-    if (now - lastTouchEnd <= 300) {
-      e.preventDefault();
-    }
-    lastTouchEnd = now;
-  }, {passive: false});
+  // 页面加载完成后的初始化
+  document.addEventListener('DOMContentLoaded', function() {
+    // 确保页面完全加载
+    setTimeout(() => {
+      if (isIOS) {
+        // iOS特定的初始化
+        document.body.style.height = '100vh';
+        document.body.style.overflow = 'hidden';
+      }
+    }, 100);
+  });
   
 })();
 </script>
