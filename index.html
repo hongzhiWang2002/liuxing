@@ -220,20 +220,20 @@
     left: 100%;
   }
   
-  .btn-yes {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-    color: white;
-    min-width: 180px;
-    transform: scale(1.2);
-    box-shadow: 0 15px 50px rgba(102, 126, 234, 0.4);
-  }
-  
-  .btn-no {
+  .btn-angry {
     background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 50%, #fd79a8 100%);
     color: white;
-    min-width: 120px;
+    min-width: 160px;
     transform: scale(0.7);
     box-shadow: 0 8px 30px rgba(255, 107, 107, 0.3);
+  }
+  
+  .btn-forgive {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    color: white;
+    min-width: 200px;
+    transform: scale(1.2);
+    box-shadow: 0 15px 50px rgba(102, 126, 234, 0.4);
   }
   
   .btn:active {
@@ -371,12 +371,12 @@
       font-size: 18px;
     }
     
-    .btn-yes {
-      min-width: 240px;
+    .btn-forgive {
+      min-width: 260px;
     }
     
-    .btn-no {
-      min-width: 160px;
+    .btn-angry {
+      min-width: 180px;
     }
     
     .question {
@@ -423,8 +423,8 @@
 <div class="content" id="mainContent">
   <div class="question">小玉宝宝别生气啦？🤔</div>
   <div class="button-container">
-    <button class="btn btn-yes" id="yesBtn">去死好吗？ 😤</button>
-    <button class="btn btn-no" id="noBtn">原谅你啦 ！✨</button>
+    <button class="btn btn-angry" id="angryBtn">去死好吗？ 😤</button>
+    <button class="btn btn-forgive" id="forgiveBtn">原谅你啦！✨</button>
   </div>
 </div>
 
@@ -446,13 +446,13 @@
   }
   
   // 交互逻辑
-  const yesBtn = document.getElementById('yesBtn');
-  const noBtn = document.getElementById('noBtn');
+  const angryBtn = document.getElementById('angryBtn');
+  const forgiveBtn = document.getElementById('forgiveBtn');
   const mainContent = document.getElementById('mainContent');
   const resultMessage = document.getElementById('resultMessage');
   const heartContainer = document.getElementById('heartContainer');
   
-  let yesClickCount = 0;
+  let angryClickCount = 0;
   let gameEnded = false;
   let touchHandled = false;
   
@@ -471,8 +471,8 @@
     e.preventDefault();
   }, {passive: false});
   
-  // "想要看" 按钮逻辑
-  function handleYesClick(e) {
+  // "去死好吗？" 按钮逻辑 - 这个按钮会越点越小
+  function handleAngryClick(e) {
     if (gameEnded || touchHandled) return;
     
     e.preventDefault();
@@ -481,44 +481,44 @@
     
     setTimeout(() => { touchHandled = false; }, 300);
     
-    yesClickCount++;
+    angryClickCount++;
     
     // 创建点击爱心效果
     createHearts(e.target.getBoundingClientRect());
     
-    // 按钮大小变化
-    const yesScale = Math.max(0.4, 1.2 - yesClickCount * 0.16);
-    const noScale = Math.min(2.0, 0.7 + yesClickCount * 0.26);
+    // 按钮大小变化：生气按钮越来越小，原谅按钮越来越大
+    const angryScale = Math.max(0.3, 0.7 - angryClickCount * 0.08);
+    const forgiveScale = Math.min(2.2, 1.2 + angryClickCount * 0.2);
     
-    yesBtn.style.transform = `scale(${yesScale})`;
-    noBtn.style.transform = `scale(${noScale})`;
+    angryBtn.style.transform = `scale(${angryScale})`;
+    forgiveBtn.style.transform = `scale(${forgiveScale})`;
     
     // 按钮文字变化
-    const yesTexts = [
-      '给我死滚 ✨', 
-      '别狗叫了 🥺', 
-      ' bro你也配？🙏'', 
-      '回家好吗？孩子 🥺', 
-      '不可能滴 ！🙏'
+    const angryTexts = [
+      '给我死滚！😡', 
+      '别狗叫了！🤬', 
+      'bro你也配？🙄', 
+      '回家吧孩子🥱', 
+      '不可能的！😤'
     ];
-    if (yesClickCount < yesTexts.length) {
-      yesBtn.textContent = yesTexts[yesClickCount];
+    if (angryClickCount < angryTexts.length) {
+      angryBtn.textContent = angryTexts[angryClickCount];
     }
     
     // 点击5次后的最终效果
-    if (yesClickCount >= 5) {
+    if (angryClickCount >= 5) {
       gameEnded = true;
       mainContent.style.opacity = '0';
       
       setTimeout(() => {
         createMassiveHearts();
-        showResult('哈哈哈！🤣<br><br>玉米豆没有生气啦～<br><br>王宏智你个傻子 💕<br><br>💕 被骗了吧 💕');
+        showResult('哈哈哈！🤣<br><br>玉米豆没有生气啦～<br><br>王宏智你个傻子💕<br><br>💕 被骗了吧 💕');
       }, 800);
     }
   }
   
-  // "不想要看" 按钮逻辑
-  function handleNoClick(e) {
+  // "原谅你啦！" 按钮逻辑 - 直接结束游戏
+  function handleForgiveClick(e) {
     if (gameEnded || touchHandled) return;
     
     e.preventDefault();
@@ -531,16 +531,17 @@
     mainContent.style.opacity = '0';
     
     setTimeout(() => {
-      showResult(' 谢谢宝宝<br><br>（爱你宝贝 😝）<br><br>💔 亲亲 💔');
+      createMassiveHearts();
+      showResult('谢谢宝宝！💕<br><br>（爱你宝贝😝）<br><br>💖 亲亲抱抱举高高 💖');
     }, 800);
   }
   
   // 绑定事件（同时支持点击和触摸）
-  yesBtn.addEventListener('click', handleYesClick, {passive: false});
-  yesBtn.addEventListener('touchend', handleYesClick, {passive: false});
+  angryBtn.addEventListener('click', handleAngryClick, {passive: false});
+  angryBtn.addEventListener('touchend', handleAngryClick, {passive: false});
   
-  noBtn.addEventListener('click', handleNoClick, {passive: false});
-  noBtn.addEventListener('touchend', handleNoClick, {passive: false});
+  forgiveBtn.addEventListener('click', handleForgiveClick, {passive: false});
+  forgiveBtn.addEventListener('touchend', handleForgiveClick, {passive: false});
   
   function createHearts(buttonRect) {
     const heartSymbols = ['💖', '💕', '💗', '💘', '💝', '💞', '💓', '💟'];
