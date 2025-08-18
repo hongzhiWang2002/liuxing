@@ -2,141 +2,33 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no,minimum-scale=1,maximum-scale=1"/>
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-touch-fullscreen" content="yes">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"/>
 <title>小玉の网站</title>
 <style>
-  * { 
-    margin: 0; 
-    padding: 0; 
-    box-sizing: border-box; 
-    -webkit-tap-highlight-color: transparent;
-  }
-  
+  * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { 
-    height: 100vh; 
-    width: 100vw;
+    height: 100%; 
     background: #020214; 
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", "Microsoft YaHei", sans-serif;
-    -webkit-user-select: none; 
-    -ms-user-select: none; 
-    user-select: none;
     overflow: hidden;
-    -webkit-touch-callout: none;
+  }
+  
+  canvas { 
+    display: block; 
+    width: 100vw; 
+    height: 100vh; 
     position: fixed;
     top: 0;
     left: 0;
-  }
-  
-  /* iOS Safari 专用优化 */
-  @supports (-webkit-touch-callout: none) {
-    html, body {
-      -webkit-overflow-scrolling: touch;
-      -webkit-transform: translate3d(0,0,0);
-      transform: translate3d(0,0,0);
-    }
-  }
-  
-  .background {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
     z-index: 1;
-    background: radial-gradient(ellipse at center, #0a0a20 0%, #020214 50%, #000008 100%);
   }
   
-  .stars {
-    position: absolute;
+  .page {
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    background-image: 
-      radial-gradient(2px 2px at 20px 30px, #eee, transparent),
-      radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
-      radial-gradient(1px 1px at 90px 40px, #fff, transparent),
-      radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.6), transparent),
-      radial-gradient(2px 2px at 160px 30px, rgba(255,255,255,0.9), transparent);
-    background-repeat: repeat;
-    background-size: 200px 100px;
-    animation: twinkle 4s linear infinite;
-  }
-  
-  @keyframes twinkle {
-    0%, 100% { opacity: 0.8; }
-    50% { opacity: 1; }
-  }
-  
-  .shooting-star {
-    position: absolute;
-    width: 2px;
-    height: 2px;
-    border-radius: 50%;
-    background: linear-gradient(45deg, #fff, transparent);
-    animation: shoot 3s linear infinite;
-    opacity: 0;
-  }
-  
-  @keyframes shoot {
-    0% {
-      opacity: 0;
-      transform: translateX(-100px) translateY(50px);
-    }
-    10% {
-      opacity: 1;
-    }
-    90% {
-      opacity: 1;
-    }
-    100% {
-      opacity: 0;
-      transform: translateX(300px) translateY(-200px);
-    }
-  }
-  
-  .shooting-star:nth-child(1) { 
-    top: 10%; 
-    left: 10%; 
-    animation-delay: 0s;
-    box-shadow: 0 0 10px #fff, 0 0 20px #87ceeb, -10px 5px 30px rgba(255,255,255,0.3);
-  }
-  
-  .shooting-star:nth-child(2) { 
-    top: 30%; 
-    left: 20%; 
-    animation-delay: 1s;
-    box-shadow: 0 0 10px #fff, 0 0 20px #ffb6c1, -10px 5px 30px rgba(255,182,193,0.3);
-  }
-  
-  .shooting-star:nth-child(3) { 
-    top: 50%; 
-    left: 30%; 
-    animation-delay: 2s;
-    box-shadow: 0 0 10px #fff, 0 0 20px #dda0dd, -10px 5px 30px rgba(221,160,221,0.3);
-  }
-  
-  .shooting-star:nth-child(4) { 
-    top: 20%; 
-    left: 50%; 
-    animation-delay: 0.5s;
-    box-shadow: 0 0 10px #fff, 0 0 20px #87ceeb, -10px 5px 30px rgba(255,255,255,0.3);
-  }
-  
-  .shooting-star:nth-child(5) { 
-    top: 70%; 
-    left: 60%; 
-    animation-delay: 1.5s;
-    box-shadow: 0 0 10px #fff, 0 0 20px #f0e68c, -10px 5px 30px rgba(240,230,140,0.3);
-  }
-  
-  .content {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -144,64 +36,96 @@
     z-index: 10;
     padding: 20px;
     text-align: center;
-    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   }
   
-  .question {
-    font-size: clamp(24px, 6vw, 36px);
+  .page.active {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  .main-title {
+    font-size: clamp(32px, 8vw, 64px);
     color: #fff;
-    margin-bottom: 50px;
-    text-shadow: 
-      0 0 20px rgba(255,255,255,0.9), 
-      0 0 40px rgba(135,206,250,0.7), 
-      0 0 60px rgba(255,182,193,0.5);
-    animation: glow 2s ease-in-out infinite alternate;
-    font-weight: 700;
-    line-height: 1.4;
-    letter-spacing: 1px;
-    max-width: 90%;
+    margin-bottom: 60px;
+    text-shadow: 0 0 30px rgba(255,255,255,0.9), 0 0 60px rgba(135,206,250,0.8), 0 0 90px rgba(255,182,193,0.6);
+    animation: titleGlow 3s ease-in-out infinite alternate;
+    font-weight: 900;
+    letter-spacing: 2px;
+    background: linear-gradient(45deg, #ff6ec7, #87ceeb, #ffd700, #ff69b4);
+    background-size: 400% 400%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: titleGlow 3s ease-in-out infinite alternate, gradientMove 8s ease infinite;
   }
   
-  @keyframes glow {
+  @keyframes titleGlow {
     from { 
-      text-shadow: 
-        0 0 20px rgba(255,255,255,0.9), 
-        0 0 40px rgba(135,206,250,0.7), 
-        0 0 60px rgba(255,182,193,0.5);
+      text-shadow: 0 0 30px rgba(255,255,255,0.9), 0 0 60px rgba(135,206,250,0.8), 0 0 90px rgba(255,182,193,0.6);
       transform: scale(1);
     }
     to { 
-      text-shadow: 
-        0 0 30px rgba(255,255,255,1), 
-        0 0 60px rgba(135,206,250,0.9), 
-        0 0 80px rgba(255,182,193,0.7);
-      transform: scale(1.02);
+      text-shadow: 0 0 40px rgba(255,255,255,1), 0 0 80px rgba(135,206,250,1), 0 0 120px rgba(255,182,193,0.8);
+      transform: scale(1.05);
     }
   }
   
-  .button-container {
-    display: flex;
-    gap: 30px;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
+  @keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  
+  .section-title {
+    font-size: clamp(24px, 5vw, 40px);
+    color: #fff;
+    margin-bottom: 40px;
+    text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 40px rgba(135,206,250,0.6);
+    font-weight: 700;
+  }
+  
+  .button-grid {
+    display: grid;
+    gap: 20px;
+    max-width: 800px;
+    width: 100%;
+  }
+  
+  .main-buttons {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .photo-buttons {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .work-buttons {
+    grid-template-columns: repeat(3, 1fr);
   }
   
   .btn {
-    padding: 18px 36px;
+    padding: 20px 30px;
     border: none;
-    border-radius: 30px;
-    font-size: 20px;
+    border-radius: 25px;
+    font-size: 18px;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.4);
-    backdrop-filter: blur(15px);
-    border: 2px solid rgba(255,255,255,0.1);
-    -webkit-appearance: none;
-    -webkit-tap-highlight-color: transparent;
+    backdrop-filter: blur(20px);
+    border: 2px solid rgba(255,255,255,0.2);
+    color: #fff;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
   }
   
   .btn:before {
@@ -215,409 +139,683 @@
     transition: left 0.6s;
   }
   
-  .btn:hover:before,
-  .btn:active:before {
+  .btn:hover:before {
     left: 100%;
   }
   
-  .btn-angry {
-    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 50%, #fd79a8 100%);
-    color: white;
-    min-width: 160px;
-    transform: scale(0.7);
-    box-shadow: 0 8px 30px rgba(255, 107, 107, 0.3);
-  }
-  
-  .btn-forgive {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-    color: white;
-    min-width: 200px;
-    transform: scale(1.2);
-    box-shadow: 0 15px 50px rgba(102, 126, 234, 0.4);
+  .btn:hover {
+    transform: translateY(-8px) scale(1.05);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
   }
   
   .btn:active {
-    transform: scale(0.95) !important;
+    transform: translateY(-4px) scale(1.02);
+    transition: all 0.1s ease;
   }
   
-  .result-message {
+  .btn:focus-visible {
+    outline: 3px solid rgba(135,206,250,0.8);
+    outline-offset: 2px;
+  }
+  
+  .btn-main {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+    min-height: 100px;
+    font-size: 20px;
+  }
+  
+  .btn-photo {
+    background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+    box-shadow: 0 10px 30px rgba(255, 154, 158, 0.3);
+  }
+  
+  .btn-work {
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 50%, #d299c2 100%);
+    box-shadow: 0 10px 30px rgba(168, 237, 234, 0.3);
+  }
+  
+  .btn-emoji {
+    font-size: 24px;
+    margin-bottom: 5px;
+  }
+  
+  .back-btn {
     position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: clamp(20px, 4vw, 28px);
+    top: 30px;
+    left: 30px;
+    padding: 15px 25px;
+    border: none;
+    border-radius: 25px;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(15px);
+    border: 2px solid rgba(255,255,255,0.2);
     color: #fff;
-    text-align: center;
-    opacity: 0;
-    text-shadow: 
-      0 0 30px rgba(255,255,255,0.9), 
-      0 0 50px rgba(255,182,193,0.7);
-    font-weight: 700;
-    line-height: 1.6;
-    z-index: 30;
-    padding: 30px;
-    border-radius: 20px;
-    background: rgba(0,0,0,0.3);
-    backdrop-filter: blur(20px);
-    border: 2px solid rgba(255,255,255,0.1);
-    max-width: 90%;
-    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 20;
   }
   
-  .heart-container {
+  .back-btn:hover {
+    background: rgba(255,255,255,0.2);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+  }
+  
+  .back-btn:active {
+    transform: translateY(-1px);
+  }
+  
+  /* 照片查看器 */
+  .photo-viewer {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
-    pointer-events: none;
-    z-index: 25;
-    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.95);
+    backdrop-filter: blur(30px);
+    z-index: 50;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.5s ease;
   }
   
-  .heart {
+  .photo-viewer.active {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  .photo-content {
+    position: relative;
+    max-width: 90%;
+    max-height: 90%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transform: scale(0.7) rotateY(90deg);
+    transition: transform 0.5s ease;
+  }
+  
+  .photo-viewer.active .photo-content {
+    transform: scale(1) rotateY(0deg);
+  }
+  
+  .photo-display {
+    max-width: 100%;
+    max-height: 75vh;
+    border-radius: 20px;
+    box-shadow: 0 25px 80px rgba(0,0,0,0.6);
+    border: 3px solid rgba(255,255,255,0.3);
+    object-fit: contain;
+    background: radial-gradient(ellipse at center, rgba(255,255,255,0.1), rgba(0,0,0,0));
+  }
+  
+  .photo-info {
+    color: #fff;
+    font-size: 20px;
+    font-weight: 600;
+    margin-top: 18px;
+    text-shadow: 0 0 20px rgba(255,255,255,0.8);
+    text-align: center;
+  }
+  
+  .close-photo-btn {
     position: absolute;
-    font-size: 30px;
-    animation: heartFloat 4s ease-out forwards;
-    text-shadow: 0 0 15px rgba(255,105,180,0.9);
-    pointer-events: none;
+    top: -20px;
+    right: -20px;
+    width: 50px;
+    height: 50px;
+    border: none;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 25px rgba(255, 107, 107, 0.5);
+    transition: all 0.3s ease;
+    font-weight: bold;
   }
   
-  @keyframes heartFloat {
-    0% {
-      opacity: 1;
-      transform: translateY(0) scale(0.5) rotate(0deg);
-    }
-    25% {
-      opacity: 1;
-      transform: translateY(-50px) scale(1) rotate(90deg);
-    }
-    50% {
-      opacity: 1;
-      transform: translateY(-120px) scale(1.3) rotate(180deg);
-    }
-    75% {
-      opacity: 0.8;
-      transform: translateY(-180px) scale(1.1) rotate(270deg);
-    }
-    100% {
-      opacity: 0;
-      transform: translateY(-250px) scale(0.8) rotate(360deg);
-    }
+  .close-photo-btn:hover {
+    transform: scale(1.15);
+    box-shadow: 0 12px 35px rgba(255, 107, 107, 0.7);
   }
   
-  .massive-heart {
+  /* 作品查看器 */
+  .work-viewer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.95);
+    backdrop-filter: blur(30px);
+    z-index: 50;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.5s ease;
+    padding: 40px;
+  }
+  
+  .work-viewer.active {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  .work-content {
+    position: relative;
+    max-width: 900px;
+    width: 100%;
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(25px);
+    border-radius: 25px;
+    padding: 40px;
+    border: 2px solid rgba(255,255,255,0.2);
+    box-shadow: 0 25px 80px rgba(0,0,0,0.4);
+    transform: scale(0.8) translateY(50px);
+    transition: transform 0.5s ease;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+  
+  .work-viewer.active .work-content {
+    transform: scale(1) translateY(0);
+  }
+  
+  .work-title {
+    color: #fff;
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 22px;
+    text-align: center;
+    text-shadow: 0 0 20px rgba(255,255,255,0.8);
+  }
+  
+  .work-text {
+    color: #fff;
+    font-size: 18px;
+    line-height: 1.9;
+    text-shadow: 0 0 10px rgba(255,255,255,0.6);
+    white-space: pre-line;
+    text-align: left;
+  }
+  
+  .close-work-btn {
     position: absolute;
-    font-size: 40px;
-    animation: massiveHeartFloat 5s ease-out forwards;
-    text-shadow: 
-      0 0 20px rgba(255,105,180,1), 
-      0 0 40px rgba(255,182,193,0.8);
-    pointer-events: none;
+    top: -20px;
+    right: -20px;
+    width: 50px;
+    height: 50px;
+    border: none;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 25px rgba(255, 107, 107, 0.5);
+    transition: all 0.3s ease;
+    font-weight: bold;
   }
   
-  @keyframes massiveHeartFloat {
-    0% {
-      opacity: 0;
-      transform: translateY(100px) scale(0.3) rotate(0deg);
-    }
-    20% {
-      opacity: 1;
-      transform: translateY(50px) scale(1.2) rotate(72deg);
-    }
-    40% {
-      opacity: 1;
-      transform: translateY(0px) scale(1.5) rotate(144deg);
-    }
-    60% {
-      opacity: 1;
-      transform: translateY(-50px) scale(1.3) rotate(216deg);
-    }
-    80% {
-      opacity: 0.8;
-      transform: translateY(-100px) scale(1.1) rotate(288deg);
-    }
-    100% {
-      opacity: 0;
-      transform: translateY(-200px) scale(0.8) rotate(360deg);
-    }
-  }
-  
-  .fade-in {
-    animation: fadeIn 1.2s ease-out forwards;
-  }
-  
-  @keyframes fadeIn {
-    from { 
-      opacity: 0; 
-      transform: translate(-50%, -50%) scale(0.8) rotateY(90deg);
-    }
-    to { 
-      opacity: 1; 
-      transform: translate(-50%, -50%) scale(1) rotateY(0deg);
-    }
+  .close-work-btn:hover {
+    transform: scale(1.15);
+    box-shadow: 0 12px 35px rgba(255, 107, 107, 0.7);
   }
   
   /* 响应式设计 */
-  @media (max-width: 480px) {
-    .button-container {
-      flex-direction: column;
-      gap: 20px;
-    }
-    
-    .btn {
-      min-width: 200px;
-      padding: 20px 40px;
-      font-size: 18px;
-    }
-    
-    .btn-forgive {
-      min-width: 260px;
-    }
-    
-    .btn-angry {
-      min-width: 180px;
-    }
-    
-    .question {
-      margin-bottom: 60px;
-      padding: 0 15px;
-      font-size: clamp(20px, 7vw, 28px);
-    }
-    
-    .result-message {
-      font-size: clamp(18px, 5vw, 24px);
-      padding: 25px 20px;
-    }
-    
-    .shooting-star {
-      display: none; /* 在移动设备上隐藏可能有问题的动画 */
-    }
+  @media (max-width: 768px) {
+    .photo-buttons { grid-template-columns: repeat(2, 1fr); }
+    .work-buttons { grid-template-columns: 1fr; }
+    .main-buttons { grid-template-columns: 1fr; gap: 25px; }
+    .btn { font-size: 16px; padding: 18px 25px; min-height: 70px; }
+    .btn-main { min-height: 90px; font-size: 18px; }
+    .back-btn { top: 15px; left: 15px; padding: 12px 20px; font-size: 14px; }
+    .work-content { padding: 30px 25px; }
+    .work-text { font-size: 16px; }
   }
   
-  /* iOS 设备特定优化 */
-  @media screen and (-webkit-min-device-pixel-ratio: 2) {
-    body {
-      -webkit-transform: translateZ(0);
-      transform: translateZ(0);
-    }
-    
-    .background, .stars {
-      -webkit-transform: translate3d(0,0,0);
-      transform: translate3d(0,0,0);
-    }
+  @media (max-width: 480px) {
+    .photo-buttons { grid-template-columns: 1fr; }
+    .main-title { margin-bottom: 40px; }
+    .section-title { margin-bottom: 30px; }
   }
 </style>
 </head>
 <body>
+<canvas id="starCanvas"></canvas>
 
-<div class="background">
-  <div class="stars"></div>
-  <div class="shooting-star"></div>
-  <div class="shooting-star"></div>
-  <div class="shooting-star"></div>
-  <div class="shooting-star"></div>
-  <div class="shooting-star"></div>
-</div>
-
-<div class="content" id="mainContent">
-  <div class="question">小玉宝宝别生气啦？🤔</div>
-  <div class="button-container">
-    <button class="btn btn-angry" id="angryBtn">去死好吗？ 😤</button>
-    <button class="btn btn-forgive" id="forgiveBtn">原谅你啦！✨</button>
+<!-- 主页 -->
+<div class="page active" id="homePage" aria-labelledby="homeTitle">
+  <h1 class="main-title" id="homeTitle">吴寒玉，我们喜欢你！</h1>
+  <div class="button-grid main-buttons" role="group" aria-label="主页导航">
+    <button class="btn btn-main" id="photoCollectionBtn">
+      <div class="btn-emoji" aria-hidden="true">📸</div>
+      <div>小玉の照片集</div>
+    </button>
+    <button class="btn btn-main" id="workCollectionBtn">
+      <div class="btn-emoji" aria-hidden="true">✍️</div>
+      <div>小玉の作品集</div>
+    </button>
   </div>
 </div>
 
-<div class="result-message" id="resultMessage"></div>
-<div class="heart-container" id="heartContainer"></div>
+<!-- 照片集页面 -->
+<div class="page" id="photoPage" aria-labelledby="photoTitle">
+  <button class="back-btn" id="backFromPhoto" aria-label="返回主页">← 返回主页</button>
+  <h2 class="section-title" id="photoTitle">小玉の照片集 📸</h2>
+  <div class="button-grid photo-buttons" role="group" aria-label="照片类别">
+    <button class="btn btn-photo" data-photo="cat">
+      <div class="btn-emoji" aria-hidden="true">🐱</div>
+      <div>猫桑</div>
+    </button>
+    <button class="btn btn-photo" data-photo="glasses">
+      <div class="btn-emoji" aria-hidden="true">👓</div>
+      <div>眼镜</div>
+    </button>
+    <button class="btn btn-photo" data-photo="goddess">
+      <div class="btn-emoji" aria-hidden="true">👸</div>
+      <div>女神（高中）</div>
+    </button>
+    <button class="btn btn-photo" data-photo="back">
+      <div class="btn-emoji" aria-hidden="true">🌅</div>
+      <div>背影</div>
+    </button>
+    <button class="btn btn-photo" data-photo="funny">
+      <div class="btn-emoji" aria-hidden="true">😂</div>
+      <div>搞笑</div>
+    </button>
+    <button class="btn btn-photo" data-photo="beautiful">
+      <div class="btn-emoji" aria-hidden="true">✨</div>
+      <div>绝美</div>
+    </button>
+    <button class="btn btn-photo" data-photo="green">
+      <div class="btn-emoji" aria-hidden="true">🌿</div>
+      <div>静谧的绿意</div>
+    </button>
+    <button class="btn btn-photo" data-photo="screen">
+      <div class="btn-emoji" aria-hidden="true">📱</div>
+      <div>屏中女子</div>
+    </button>
+  </div>
+</div>
+
+<!-- 作品集页面 -->
+<div class="page" id="workPage" aria-labelledby="workTitleHeading">
+  <button class="back-btn" id="backFromWork" aria-label="返回主页">← 返回主页</button>
+  <h2 class="section-title" id="workTitleHeading">小玉の作品集 ✍️</h2>
+  <div class="button-grid work-buttons" role="group" aria-label="作品列表">
+    <button class="btn btn-work" data-work="poem1">
+      <div class="btn-emoji" aria-hidden="true">🌹</div>
+      <div>钗头凤*胭脂泪</div>
+    </button>
+    <button class="btn btn-work" data-work="poem2">
+      <div class="btn-emoji" aria-hidden="true">🎭</div>
+      <div>矫情诗人</div>
+    </button>
+    <button class="btn btn-work" data-work="poem3">
+      <div class="btn-emoji" aria-hidden="true">🍂</div>
+      <div>流离失所，花落人悲</div>
+    </button>
+  </div>
+</div>
+
+<!-- 照片查看器 -->
+<div class="photo-viewer" id="photoViewer" aria-modal="true" role="dialog" aria-labelledby="photoInfo">
+  <div class="photo-content">
+    <img class="photo-display" id="photoDisplay" src="" alt="小玉的照片" />
+    <div class="photo-info" id="photoInfo"></div>
+    <button class="close-photo-btn" id="closePhotoBtn" aria-label="关闭">×</button>
+  </div>
+</div>
+
+<!-- 作品查看器 -->
+<div class="work-viewer" id="workViewer" aria-modal="true" role="dialog" aria-labelledby="workTitle">
+  <div class="work-content">
+    <h3 class="work-title" id="workTitle"></h3>
+    <div class="work-text" id="workText"></div>
+    <button class="close-work-btn" id="closeWorkBtn" aria-label="关闭">×</button>
+  </div>
+</div>
 
 <script>
 (() => {
-  'use strict';
+  // 动态星空背景
+  const canvas = document.getElementById('starCanvas');
+  const ctx = canvas.getContext('2d', { alpha: false });
+  let DPR = Math.max(window.devicePixelRatio || 1, 1);
   
-  // 检测是否为iOS设备
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+  const SPAWN_RATE = 0.15;
+  const BASE_SPEED = 1000;
+  const BASE_SIZE = 3;
+  const TRAIL_LEN = 20;
   
-  // iOS兼容性优化
-  if (isIOS) {
-    document.body.style.webkitTransform = 'translate3d(0,0,0)';
-    document.body.style.transform = 'translate3d(0,0,0)';
+  let W = 0, H = 0;
+  
+  function resize() {
+    DPR = Math.max(window.devicePixelRatio || 1, 1.5);
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    canvas.width = Math.round(W * DPR);
+    canvas.height = Math.round(H * DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   }
   
-  // 交互逻辑
-  const angryBtn = document.getElementById('angryBtn');
-  const forgiveBtn = document.getElementById('forgiveBtn');
-  const mainContent = document.getElementById('mainContent');
-  const resultMessage = document.getElementById('resultMessage');
-  const heartContainer = document.getElementById('heartContainer');
+  window.addEventListener('resize', resize, {passive: true});
+  resize();
   
-  let angryClickCount = 0;
-  let gameEnded = false;
-  let touchHandled = false;
-  
-  // 防止iOS双击缩放
-  let lastTouchEnd = 0;
-  document.addEventListener('touchend', function (event) {
-    const now = Date.now();
-    if (now - lastTouchEnd <= 300) {
-      event.preventDefault();
-    }
-    lastTouchEnd = now;
-  }, {passive: false});
-  
-  // 防止iOS滚动
-  document.addEventListener('touchmove', function(e) {
-    e.preventDefault();
-  }, {passive: false});
-  
-  // "去死好吗？" 按钮逻辑 - 这个按钮会越点越小
-  function handleAngryClick(e) {
-    if (gameEnded || touchHandled) return;
-    
-    e.preventDefault();
-    e.stopPropagation();
-    touchHandled = true;
-    
-    setTimeout(() => { touchHandled = false; }, 300);
-    
-    angryClickCount++;
-    
-    // 创建点击爱心效果
-    createHearts(e.target.getBoundingClientRect());
-    
-    // 按钮大小变化：生气按钮越来越小，原谅按钮越来越大
-    const angryScale = Math.max(0.3, 0.7 - angryClickCount * 0.08);
-    const forgiveScale = Math.min(2.2, 1.2 + angryClickCount * 0.2);
-    
-    angryBtn.style.transform = `scale(${angryScale})`;
-    forgiveBtn.style.transform = `scale(${forgiveScale})`;
-    
-    // 按钮文字变化
-    const angryTexts = [
-      '给我死滚！😡', 
-      '别狗叫了！🤬', 
-      'bro你也配？🙄', 
-      '回家吧孩子🥱', 
-      '不可能的！😤'
-    ];
-    if (angryClickCount < angryTexts.length) {
-      angryBtn.textContent = angryTexts[angryClickCount];
+  class Star {
+    constructor(x, y, vx, vy, size, color) {
+      this.x = x;
+      this.y = y;
+      this.vx = vx;
+      this.vy = vy;
+      this.size = size;
+      this.color = color;
+      this.trail = [];
+      this.maxTrail = TRAIL_LEN;
+      this.alive = true;
+      this.opacity = Math.random() * 0.6 + 0.4;
     }
     
-    // 点击5次后的最终效果
-    if (angryClickCount >= 5) {
-      gameEnded = true;
-      mainContent.style.opacity = '0';
-      
-      setTimeout(() => {
-        createMassiveHearts();
-        showResult('哈哈哈！🤣<br><br>玉米豆没有生气啦～<br><br>王宏智你个傻子💕<br><br>💕 被骗了吧 💕');
-      }, 800);
-    }
-  }
-  
-  // "原谅你啦！" 按钮逻辑 - 直接结束游戏
-  function handleForgiveClick(e) {
-    if (gameEnded || touchHandled) return;
-    
-    e.preventDefault();
-    e.stopPropagation();
-    touchHandled = true;
-    
-    setTimeout(() => { touchHandled = false; }, 300);
-    
-    gameEnded = true;
-    mainContent.style.opacity = '0';
-    
-    setTimeout(() => {
-      createMassiveHearts();
-      showResult('谢谢宝宝！💕<br><br>（爱你宝贝😝）<br><br>💖 亲亲抱抱举高高 💖');
-    }, 800);
-  }
-  
-  // 绑定事件（同时支持点击和触摸）
-  angryBtn.addEventListener('click', handleAngryClick, {passive: false});
-  angryBtn.addEventListener('touchend', handleAngryClick, {passive: false});
-  
-  forgiveBtn.addEventListener('click', handleForgiveClick, {passive: false});
-  forgiveBtn.addEventListener('touchend', handleForgiveClick, {passive: false});
-  
-  function createHearts(buttonRect) {
-    const heartSymbols = ['💖', '💕', '💗', '💘', '💝', '💞', '💓', '💟'];
-    
-    for (let i = 0; i < 8; i++) {
-      setTimeout(() => {
-        const heart = document.createElement('div');
-        heart.className = 'heart';
-        heart.textContent = heartSymbols[Math.floor(Math.random() * heartSymbols.length)];
-        
-        const centerX = buttonRect.left + buttonRect.width / 2;
-        const centerY = buttonRect.top + buttonRect.height / 2;
-        
-        heart.style.left = (centerX + (Math.random() - 0.5) * 120) + 'px';
-        heart.style.top = centerY + 'px';
-        heart.style.fontSize = (25 + Math.random() * 20) + 'px';
-        heart.style.animationDelay = Math.random() * 0.5 + 's';
-        
-        heartContainer.appendChild(heart);
-        
-        setTimeout(() => {
-          if (heart.parentNode) {
-            heart.parentNode.removeChild(heart);
-          }
-        }, 4000);
-      }, i * 100);
-    }
-  }
-  
-  function createMassiveHearts() {
-    const heartSymbols = ['💖', '💕', '💗', '💘', '💝', '💞', '💓', '💟', '❤️', '💋', '🌹', '💐'];
-    
-    // 创建大量爱心效果
-    for (let i = 0; i < 50; i++) {
-      setTimeout(() => {
-        const heart = document.createElement('div');
-        heart.className = 'massive-heart';
-        heart.textContent = heartSymbols[Math.floor(Math.random() * heartSymbols.length)];
-        heart.style.left = Math.random() * window.innerWidth + 'px';
-        heart.style.top = Math.random() * window.innerHeight + 'px';
-        heart.style.fontSize = (30 + Math.random() * 25) + 'px';
-        heart.style.animationDelay = Math.random() * 0.8 + 's';
-        
-        // 随机颜色
-        const colors = ['#ff69b4', '#ff1493', '#dc143c', '#ff6347', '#ff4500', '#ffd700'];
-        heart.style.color = colors[Math.floor(Math.random() * colors.length)];
-        
-        heartContainer.appendChild(heart);
-        
-        setTimeout(() => {
-          if (heart.parentNode) {
-            heart.parentNode.removeChild(heart);
-          }
-        }, 5000);
-      }, i * 80);
-    }
-  }
-  
-  function showResult(message) {
-    resultMessage.innerHTML = message;
-    resultMessage.classList.add('fade-in');
-    resultMessage.style.opacity = '1';
-  }
-  
-  // 页面加载完成后的初始化
-  document.addEventListener('DOMContentLoaded', function() {
-    // 确保页面完全加载
-    setTimeout(() => {
-      if (isIOS) {
-        // iOS特定的初始化
-        document.body.style.height = '100vh';
-        document.body.style.overflow = 'hidden';
+    update(dt) {
+      this.trail.unshift({x: this.x, y: this.y});
+      if (this.trail.length > this.maxTrail) this.trail.length = this.maxTrail;
+      this.x += this.vx * dt;
+      this.y += this.vy * dt;
+      const margin = 150;
+      if (this.x < -margin || this.x > W + margin || this.y < -margin || this.y > H + margin) {
+        this.alive = false;
       }
-    }, 100);
+    }
+    
+    draw(ctx) {
+      // 拖尾
+      if (this.trail.length > 1) {
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+        ctx.globalCompositeOperation = 'lighter';
+        for (let i = this.trail.length - 1; i > 0; i--) {
+          const p1 = this.trail[i];
+          const p2 = this.trail[i - 1];
+          const t = i / this.trail.length;
+          const alpha = Math.pow(t, 1.5) * 0.3 * this.opacity;
+          ctx.strokeStyle = `rgba(${Math.round(this.color[0] * 255)},${Math.round(this.color[1] * 255)},${Math.round(this.color[2] * 255)},${alpha})`;
+          ctx.lineWidth = Math.max(1, this.size * (0.3 + t * 1.5));
+          ctx.beginPath();
+          ctx.moveTo(p1.x, p1.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.stroke();
+        }
+        ctx.globalCompositeOperation = 'source-over';
+      }
+      
+      // 星体
+      const r = this.size;
+      const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, r * 4);
+      gradient.addColorStop(0, `rgba(255,255,255,${0.9 * this.opacity})`);
+      gradient.addColorStop(0.3, `rgba(${Math.round(this.color[0] * 255)},${Math.round(this.color[1] * 255)},${Math.round(this.color[2] * 255)},${0.7 * this.opacity})`);
+      gradient.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, r * 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  
+  let stars = [];
+  
+  function spawnStar() {
+    const side = Math.random();
+    let sx, sy, vx, vy;
+    
+    if (side < 0.7) {
+      sx = randBetween(-W * 0.3, W * 0.4);
+      sy = randBetween(-H * 0.2, H * 0.3);
+      const angle = Math.random() * 0.5 + 0.3;
+      const speed = randBetween(BASE_SPEED * 0.6, BASE_SPEED * 1.2);
+      vx = speed * Math.cos(angle);
+      vy = speed * Math.sin(angle);
+    } else {
+      sx = randBetween(W * 0.6, W * 1.3);
+      sy = randBetween(-H * 0.2, H * 0.3);
+      const angle = Math.random() * 0.5 + 2.6;
+      const speed = randBetween(BASE_SPEED * 0.6, BASE_SPEED * 1.2);
+      vx = speed * Math.cos(angle);
+      vy = speed * Math.sin(angle);
+    }
+    
+    const size = randBetween(BASE_SIZE * 0.5, BASE_SIZE * 1.8);
+    
+    const colors = [
+      [1.0, 1.0, 0.9],     // 暖白
+      [0.7, 0.9, 1.0],     // 冰蓝
+      [1.0, 0.8, 0.6],     // 暖黄
+      [0.9, 0.7, 1.0],     // 淡紫
+      [1.0, 0.7, 0.8],     // 粉红
+      [0.7, 1.0, 0.8]      // 薄荷绿
+    ];
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    
+    stars.push(new Star(sx, sy, vx / 1000, vy / 1000, size, color));
+  }
+  
+  function randBetween(a, b) { return a + Math.random() * (b - a); }
+  
+  // 初始化星星
+  for (let i = 0; i < 15; i++) spawnStar();
+  
+  let lastTime = performance.now();
+  
+  function animate(currentTime) {
+    const dt = Math.min(50, currentTime - lastTime);
+    lastTime = currentTime;
+    const deltaSeconds = dt / 1000;
+    
+    if (Math.random() < SPAWN_RATE) spawnStar();
+    
+    // 动态渐变背景
+    const time = currentTime * 0.001;
+    const bgGradient = ctx.createRadialGradient(
+      W/2 + Math.sin(time * 0.3) * 200, 
+      H/2 + Math.cos(time * 0.2) * 150, 
+      0, 
+      W/2, H/2, 
+      Math.max(W, H) * 0.8
+    );
+    bgGradient.addColorStop(0, '#1a1a2e');
+    bgGradient.addColorStop(0.4, '#16213e');
+    bgGradient.addColorStop(0.7, '#0f0f23');
+    bgGradient.addColorStop(1, '#020214');
+    ctx.fillStyle = bgGradient;
+    ctx.fillRect(0, 0, W, H);
+    
+    // 更新和绘制星星
+    for (let i = stars.length - 1; i >= 0; i--) {
+      const star = stars[i];
+      star.update(dt);
+      if (!star.alive) {
+        stars.splice(i, 1);
+        continue;
+      }
+      star.draw(ctx);
+    }
+    
+    requestAnimationFrame(animate);
+  }
+  
+  requestAnimationFrame(animate);
+  
+  // 页面导航
+  const pages = {
+    home: document.getElementById('homePage'),
+    photo: document.getElementById('photoPage'),
+    work: document.getElementById('workPage')
+  };
+  
+  const photoViewer = document.getElementById('photoViewer');
+  const workViewer = document.getElementById('workViewer');
+  const photoImg = document.getElementById('photoDisplay');
+  const photoInfo = document.getElementById('photoInfo');
+  const closePhotoBtn = document.getElementById('closePhotoBtn');
+  const workTitle = document.getElementById('workTitle');
+  const workText = document.getElementById('workText');
+  const closeWorkBtn = document.getElementById('closeWorkBtn');
+  
+  function showPage(pageName) {
+    Object.values(pages).forEach(page => page.classList.remove('active'));
+    pages[pageName].classList.add('active');
+  }
+  
+  // 主页按钮事件
+  document.getElementById('photoCollectionBtn').addEventListener('click', () => showPage('photo'));
+  document.getElementById('workCollectionBtn').addEventListener('click', () => showPage('work'));
+  
+  // 返回按钮事件
+  document.getElementById('backFromPhoto').addEventListener('click', () => showPage('home'));
+  document.getElementById('backFromWork').addEventListener('click', () => showPage('home'));
+  
+  // 照片数据（你可以把路径换成自己的图片）
+  const photoData = {
+    cat: { src: './assets/photos/cat.jpg', title: '猫桑 🐱' },
+    glasses: { src: './assets/photos/glasses.jpg', title: '眼镜 👓' },
+    goddess: { src: './assets/photos/goddess.jpg', title: '女神（高中）👸' },
+    back: { src: './assets/photos/back.jpg', title: '背影 🌅' },
+    funny: { src: './assets/photos/funny.jpg', title: '搞笑 😂' },
+    beautiful: { src: './assets/photos/beautiful.jpg', title: '绝美 ✨' },
+    green: { src: './assets/photos/green.jpg', title: '静谧的绿意 🌿' },
+    screen: { src: './assets/photos/screen.jpg', title: '屏中女子 📱' }
+  };
+  
+  // 作品数据
+  const workData = {
+    poem1: {
+      title: '钗头凤*胭脂泪 🌹',
+      content: `钗头凤*胭脂泪
+霜飔过，梨花落，
+竹窗残影叹萧索。
+乌丝乱，朱唇淡，
+寂帘积寒，冷月消散。
+盼！盼！盼！
+烟眉蹙，愁思赋，
+山盟比翼天偏妒。
+鸳鸯伴，情笺断，
+灯宴阑珊，何舟渡岸?
+乱！乱！乱!`
+    },
+    poem2: {
+      title: '矫情诗人 🎭',
+      content: `矫情诗人	
+薄砚一方，尺素三笺
+提笔拓落，又言悲歌
+聊寄清冷月色
+何赠我一截蒹葭白露的雨水
+后山幽禽杂鸣
+难许我一曲洋洋盈耳的笙歌
+酒满瓯，渡寒秋
+花满渚，木泛舟
+过青石板楼，漾秋水悠悠
+赏小竹清雅，嘲残花知秋
+俗世嘈唔，那凄风杂草难烧
+腐骨躯躯,我徒有其表空有皮毛
+我的恶臭尸骨
+会长满疥疮蠕虫!
+我的陈词烂墨
+龃龉着人世苦楚寥落!
+我眉山下
+是晦涩厌世的愁眸
+可我的心啊	
+竟也顷波着爱的根骨…
+且许，我悬笔未决
+欲吟，我逢春不灭`
+    },
+    poem3: {
+      title: '流离失所，花落人悲 🍂',
+      content: `某天
+你是否还会凑近我脸瞥见峨眉，梨花带水;
+勾唇挑趣:“又修细眉，是掩盖喜悲，还是学黛玉苦情美。”
+我不禁莞尔，红妆对镜，
+乍看，无半分黛玉之风情婉媚...
+亲爱的，又一年燥热蝉鸣。
+许久不见，青涩的发已然不墨直，添了几分成熟的影子，火红、燥灼、甚至春打我的发梳!似乎在反教条、桎梏...所以吉普赛式地贪恋野
+性?啊哈，说笑了，这很像...月桂?
+镜中杂眉，我修了又修，仍细，似蜻蜓点水，挂我眼楣，诡谲凄怆，还是不要在白天扮女鬼;我想，也许和你的杏眼绝配。
+近日无雨，仍想问你，听夜雨声是否烦忧?
+身处霓虹，是否忆起故乡的幽僻一隅;簌簌叶落，是否如旧治愈。
+是否...想到这冗长的一生，再也不能相见，难免哽咽。
+尘俗尔尔，趁风软一江水，破口大骂这人世间/
+意满后追着禅意，逍遥天边。
+奈何寂寞难耐，非得与人推心置腹，情感博弈。最终创作停滞、被人
+们亲切地称道--江郎才尽...
+许久未抬笔，何时再互递诗文，觥觞酬酢。
+哦对，还没来得及告诉你我随笔的主要目的:近来养了一只小狗，呆蠢，难免不失兽性，但炸毛时只会哼气撒娇;老爱蹭我的肩，不知道骨头有没有硌着它。乖顺又反骨，可气又好笑，这家伙可有意思了。
+不是每天跑五点二公里挥霍狗劲，就是在乒乓写字驯化四肢。可久没
+逗它了，不知道有没有暗自神伤，发誓再也不要理我。
+Jam 的歌词中说:
+“从古至今无人做到自由的美”
+“得失只在一席话儡，流离失所，花落人悲。”“说不爱就是爱，优柔寡断情难猜，爱在最初是情怀。”
+我不再追忆蹙罥烟眉，你何故轻拭我划过的泪水。`
+    }
+  };
+  
+  // 绑定照片按钮
+  document.querySelectorAll('.btn-photo').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.getAttribute('data-photo');
+      const item = photoData[key];
+      if (!item) return;
+      photoImg.src = item.src;
+      photoImg.alt = item.title;
+      photoInfo.textContent = item.title;
+      photoViewer.classList.add('active');
+      // 图片加载失败兜底
+      photoImg.onerror = () => {
+        photoInfo.textContent = item.title + '（找不到图片，换一张路径吧~）';
+        photoImg.removeAttribute('src');
+        photoImg.style.background = 'repeating-linear-gradient(45deg, rgba(255,255,255,0.06), rgba(255,255,255,0.06) 10px, rgba(0,0,0,0.1) 10px, rgba(0,0,0,0.1) 20px)';
+      };
+    });
   });
   
+  function closePhoto() { photoViewer.classList.remove('active'); }
+  closePhotoBtn.addEventListener('click', closePhoto);
+  photoViewer.addEventListener('click', (e) => { if (e.target === photoViewer) closePhoto(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closePhoto(); closeWork(); } });
+  
+  // 绑定作品按钮
+  document.querySelectorAll('.btn-work').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.getAttribute('data-work');
+      const item = workData[key];
+      if (!item) return;
+      workTitle.textContent = item.title;
+      workText.textContent = item.content;
+      workViewer.classList.add('active');
+    });
+  });
+  
+  function closeWork() { workViewer.classList.remove('active'); }
+  closeWorkBtn.addEventListener('click', closeWork);
+  workViewer.addEventListener('click', (e) => { if (e.target === workViewer) closeWork(); });
+  
+  // 减少移动端回弹
+  workViewer.addEventListener('touchmove', (e) => { /* allow scroll inside */ }, { passive: true });
 })();
 </script>
 </body>
